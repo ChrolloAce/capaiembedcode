@@ -103,7 +103,7 @@
         }
         
         // Check if a code already exists for this purchase
-        const querySnapshot = await db.collection('accessCodes')
+        const querySnapshot = await db.collection('purchase_codes')
           .where('purchaseId', '==', purchaseId)
           .get();
         
@@ -116,7 +116,7 @@
           accessCode = generateUniqueCode();
           
           // Save to Firebase
-          await db.collection('accessCodes').add({
+          await db.collection('purchase_codes').add({
             code: accessCode,
             userId: userId,
             purchaseId: purchaseId,

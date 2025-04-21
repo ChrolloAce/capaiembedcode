@@ -23,7 +23,7 @@ const AccessCodeGenerator = ({ userId, purchaseId }) => {
         setLoading(true);
         
         // Check if a code already exists for this purchase
-        const codesRef = collection(db, 'accessCodes');
+        const codesRef = collection(db, 'purchase_codes');
         const q = query(codesRef, where('purchaseId', '==', purchaseId));
         const querySnapshot = await getDocs(q);
         
@@ -36,7 +36,7 @@ const AccessCodeGenerator = ({ userId, purchaseId }) => {
           const newCode = generateUniqueCode();
           
           // Save to Firebase
-          await addDoc(collection(db, 'accessCodes'), {
+          await addDoc(collection(db, 'purchase_codes'), {
             code: newCode,
             userId: userId,
             purchaseId: purchaseId,

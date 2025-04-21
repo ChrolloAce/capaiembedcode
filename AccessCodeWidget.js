@@ -101,7 +101,7 @@ class AccessCodeWidget extends HTMLElement {
       }
 
       // Check if a code already exists
-      const codesRef = collection(this.db, 'accessCodes');
+      const codesRef = collection(this.db, 'purchase_codes');
       const q = query(codesRef, where('purchaseId', '==', purchaseId));
       const querySnapshot = await getDocs(q);
 
@@ -114,7 +114,7 @@ class AccessCodeWidget extends HTMLElement {
         accessCode = this.generateUniqueCode();
         
         // Save to Firebase
-        await addDoc(collection(this.db, 'accessCodes'), {
+        await addDoc(collection(this.db, 'purchase_codes'), {
           code: accessCode,
           userId: userId,
           purchaseId: purchaseId,

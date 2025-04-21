@@ -20,7 +20,7 @@ npm install firebase react react-dom
 2. Update the Firebase configuration in `firebaseConfig.js` with your project credentials.
 
 3. Set up Firestore in your Firebase console:
-   - Create a collection called `accessCodes`
+   - Create a collection called `purchase_codes`
    - Set up appropriate security rules
 
 ## Usage
