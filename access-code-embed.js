@@ -29,7 +29,10 @@ class AccessCodeGenerator {
     }
 
     try {
-      firebase.initializeApp(this.firebaseConfig);
+      // Check if Firebase is already initialized
+      if (firebase.apps.length === 0) {
+        firebase.initializeApp(this.firebaseConfig);
+      }
       this.db = firebase.firestore();
       return true;
     } catch (err) {

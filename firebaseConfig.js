@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDnSewoxH75cYRPlzjX8SS8SseLTakMl_8",
   authDomain: "capped-ai.firebaseapp.com",
   projectId: "capped-ai",
-  storageBucket: "capped-ai.firebasestorage.app",
+  storageBucket: "capped-ai.appspot.com",
   messagingSenderId: "897068191530",
   appId: "1:897068191530:web:7e3d4af4908ce717021853"
 };
