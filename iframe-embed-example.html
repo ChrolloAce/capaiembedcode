@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Code Embed Example</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 250px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Thank You for Your Purchase!</h1>
+    <p>Your order has been confirmed and is being processed.</p>
+    
+    <!-- Embedding the access code generator using an iframe -->
+    <iframe 
+      src="https://your-domain.com/access-code-iframe.html?userId=user123&purchaseId=order456" 
+      title="Access Code Generator">
+    </iframe>
+    
+    <h3>What's Next?</h3>
+    <p>You can use your access code to unlock your purchase by following these steps:</p>
+    <ol>
+      <li>Copy your access code above</li>
+      <li>Go to our member portal</li>
+      <li>Enter your code in the "Redeem Access Code" section</li>
+    </ol>
+  </div>
+</body>
+</html> 
