@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDnSewoxH75cYRPlzjX8SS8SseLTakMl_8",
+  authDomain: "capped-ai.firebaseapp.com",
+  projectId: "capped-ai",
+  storageBucket: "capped-ai.firebasestorage.app",
+  messagingSenderId: "897068191530",
+  appId: "1:897068191530:web:7e3d4af4908ce717021853"
 };
 
 // Initialize Firebase
