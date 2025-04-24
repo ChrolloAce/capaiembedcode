@@ -90,6 +90,66 @@
       font-weight: bold;
       letter-spacing: 2px;
     }
+    
+    .bulk-generate-button {
+      margin-top: 20px;
+      padding: 10px 15px;
+      background-color: #6200ee;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .bulk-generate-button:hover {
+      background-color: #5000ca;
+    }
+    
+    .bulk-codes-container {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #fff;
+    }
+    
+    .bulk-code-item {
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .bulk-code-item:last-child {
+      border-bottom: none;
+    }
+    
+    .bulk-code {
+      font-family: monospace;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+    
+    .copy-all-button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .copy-all-button:hover {
+      background-color: #218838;
+    }
   </style>
   <!-- Firebase libraries -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -151,6 +211,81 @@
         });
     };
     
+    // Copy all codes function
+    const copyAllCodes = (codes) => {
+      const textToCopy = codes.join('\n');
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+          const copyAllButton = document.getElementById('copy-all-button');
+          copyAllButton.textContent = 'All Copied!';
+          
+          setTimeout(() => {
+            copyAllButton.textContent = 'Copy All Codes';
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy all codes: ', err);
+        });
+    };
+    
+    // Generate 40 codes function
+    const generateBulkCodes = async () => {
+      try {
+        const bulkContainer = document.getElementById('bulk-codes-container');
+        bulkContainer.innerHTML = '<div class="access-code-loading">Generating 40 codes...</div>';
+        
+        const codes = [];
+        const batch = db.batch();
+        
+        // Generate 40 unique codes
+        for (let i = 0; i < 40; i++) {
+          const code = generateUniqueCode();
+          codes.push(code);
+          
+          // Create a document reference for each code
+          const docRef = db.collection('purchase_codes').doc();
+          batch.set(docRef, {
+            code: code,
+            userId: 'bulk-generated',
+            purchaseId: `bulk-${Date.now()}-${i}`,
+            createdAt: new Date(),
+            used: false
+          });
+        }
+        
+        // Commit the batch
+        await batch.commit();
+        
+        // Display the codes
+        let codeListHTML = '';
+        codes.forEach((code, index) => {
+          codeListHTML += `
+            <div class="bulk-code-item">
+              <span class="bulk-code">${index + 1}. ${code}</span>
+            </div>
+          `;
+        });
+        
+        bulkContainer.innerHTML = codeListHTML;
+        
+        // Show the Copy All button
+        const copyAllButton = document.getElementById('copy-all-button');
+        copyAllButton.style.display = 'inline-block';
+        
+        // Set the click handler
+        copyAllButton.addEventListener('click', () => copyAllCodes(codes));
+        
+      } catch (err) {
+        console.error('Error generating bulk codes:', err);
+        const bulkContainer = document.getElementById('bulk-codes-container');
+        bulkContainer.innerHTML = `
+          <div class="access-code-error">
+            Failed to generate bulk codes. Error: ${err.message}
+          </div>
+        `;
+      }
+    };
+    
     // Root element
     const rootElement = document.getElementById('access-code-root');
     
@@ -197,12 +332,21 @@
             <p class="access-code-instructions">
               Save this code in a safe place. You'll need it to access your purchase.
             </p>
+            <button id="bulk-generate-button" class="bulk-generate-button">Generate 40 Test Codes</button>
+            <div id="bulk-codes-container" class="bulk-codes-container" style="display: none;"></div>
+            <button id="copy-all-button" class="copy-all-button" style="display: none;">Copy All Codes</button>
           </div>
         `;
         
         // Add click event listener to the copy button
         document.getElementById('copy-button').addEventListener('click', () => {
           copyToClipboard(accessCode);
+        });
+        
+        // Add click event listener to the bulk generate button
+        document.getElementById('bulk-generate-button').addEventListener('click', () => {
+          document.getElementById('bulk-codes-container').style.display = 'block';
+          generateBulkCodes();
         });
         
       } catch (err) {
