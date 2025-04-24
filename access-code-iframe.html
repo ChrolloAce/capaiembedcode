@@ -91,22 +91,6 @@
       letter-spacing: 2px;
     }
     
-    .bulk-generate-button {
-      margin-top: 20px;
-      padding: 10px 15px;
-      background-color: #6200ee;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.2s;
-    }
-    
-    .bulk-generate-button:hover {
-      background-color: #5000ca;
-    }
-    
     .bulk-codes-container {
       margin-top: 20px;
       max-height: 300px;
@@ -115,6 +99,7 @@
       border-radius: 4px;
       padding: 10px;
       background-color: #fff;
+      text-align: left;
     }
     
     .bulk-code-item {
@@ -150,6 +135,13 @@
     .copy-all-button:hover {
       background-color: #218838;
     }
+
+    .bulk-heading {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #333;
+    }
   </style>
   <!-- Firebase libraries -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -165,6 +157,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('userId');
     const purchaseId = urlParams.get('purchaseId');
+    const generateBulk = urlParams.get('bulk') === 'true';
     
     // Firebase configuration
     const firebaseConfig = {
@@ -231,8 +224,18 @@
     // Generate 40 codes function
     const generateBulkCodes = async () => {
       try {
-        const bulkContainer = document.getElementById('bulk-codes-container');
+        const bulkContainer = document.createElement('div');
+        bulkContainer.id = 'bulk-codes-container';
+        bulkContainer.className = 'bulk-codes-container';
         bulkContainer.innerHTML = '<div class="access-code-loading">Generating 40 codes...</div>';
+        
+        const heading = document.createElement('h3');
+        heading.className = 'bulk-heading';
+        heading.textContent = '40 Generated Access Codes';
+        
+        // Add the heading and container
+        document.querySelector('.access-code-container').appendChild(heading);
+        document.querySelector('.access-code-container').appendChild(bulkContainer);
         
         const codes = [];
         const batch = db.batch();
@@ -268,21 +271,20 @@
         
         bulkContainer.innerHTML = codeListHTML;
         
-        // Show the Copy All button
-        const copyAllButton = document.getElementById('copy-all-button');
-        copyAllButton.style.display = 'inline-block';
-        
-        // Set the click handler
+        // Add the Copy All button
+        const copyAllButton = document.createElement('button');
+        copyAllButton.id = 'copy-all-button';
+        copyAllButton.className = 'copy-all-button';
+        copyAllButton.textContent = 'Copy All Codes';
         copyAllButton.addEventListener('click', () => copyAllCodes(codes));
+        document.querySelector('.access-code-container').appendChild(copyAllButton);
         
       } catch (err) {
         console.error('Error generating bulk codes:', err);
-        const bulkContainer = document.getElementById('bulk-codes-container');
-        bulkContainer.innerHTML = `
-          <div class="access-code-error">
-            Failed to generate bulk codes. Error: ${err.message}
-          </div>
-        `;
+        const errorEl = document.createElement('div');
+        errorEl.className = 'access-code-error';
+        errorEl.textContent = `Failed to generate bulk codes. Error: ${err.message}`;
+        document.querySelector('.access-code-container').appendChild(errorEl);
       }
     };
     
@@ -332,9 +334,6 @@
             <p class="access-code-instructions">
               Save this code in a safe place. You'll need it to access your purchase.
             </p>
-            <button id="bulk-generate-button" class="bulk-generate-button">Generate 40 Test Codes</button>
-            <div id="bulk-codes-container" class="bulk-codes-container" style="display: none;"></div>
-            <button id="copy-all-button" class="copy-all-button" style="display: none;">Copy All Codes</button>
           </div>
         `;
         
@@ -343,11 +342,10 @@
           copyToClipboard(accessCode);
         });
         
-        // Add click event listener to the bulk generate button
-        document.getElementById('bulk-generate-button').addEventListener('click', () => {
-          document.getElementById('bulk-codes-container').style.display = 'block';
+        // If bulk parameter is true, automatically generate 40 codes
+        if (generateBulk) {
           generateBulkCodes();
-        });
+        }
         
       } catch (err) {
         console.error('Error generating access code:', err);
