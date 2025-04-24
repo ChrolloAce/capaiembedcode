@@ -11,6 +11,7 @@ class AccessCodeGenerator {
     this.userId = options.userId;
     this.purchaseId = options.purchaseId;
     this.db = null;
+    this.accessCode = null;
   }
 
   generateUniqueCode() {
@@ -64,21 +65,46 @@ class AccessCodeGenerator {
     `;
   }
 
+  copyToClipboard() {
+    if (!this.accessCode) return;
+    
+    navigator.clipboard.writeText(this.accessCode)
+      .then(() => {
+        const copyButton = document.getElementById('copy-button');
+        copyButton.textContent = 'Copied!';
+        copyButton.style.backgroundColor = '#28a745';
+        
+        setTimeout(() => {
+          copyButton.textContent = 'Copy';
+          copyButton.style.backgroundColor = '#0366d6';
+        }, 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+  }
+
   showCode(accessCode) {
     const container = document.getElementById(this.containerId);
     if (!container) return;
 
+    this.accessCode = accessCode;
+
     container.innerHTML = `
       <div style="margin: 20px; padding: 20px; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); text-align: center;">
         <h3 style="margin-top: 0;">Your Access Code</h3>
-        <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0; padding: 15px; background-color: #fff; border: 1px dashed #ccc; border-radius: 4px;">
-          ${accessCode}
+        <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0; padding: 15px; background-color: #fff; border: 1px dashed #ccc; border-radius: 4px;">
+          <span style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">${accessCode}</span>
+          <button id="copy-button" style="margin-left: 10px; padding: 8px 12px; background-color: #0366d6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.2s;">Copy</button>
         </div>
         <p style="font-size: 14px; color: #666; margin-top: 15px;">
           Save this code in a safe place. You'll need it to access your purchase.
         </p>
       </div>
     `;
+
+    // Add click event listener to the copy button
+    document.getElementById('copy-button').addEventListener('click', () => this.copyToClipboard());
   }
 
   async checkExistingCode() {

@@ -21,6 +21,7 @@
     }
     
     .access-code-display {
+      position: relative;
       font-size: 24px;
       font-weight: bold;
       letter-spacing: 2px;
@@ -29,6 +30,9 @@
       background-color: #fff;
       border: 1px dashed #ccc;
       border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .access-code-loading {
@@ -51,6 +55,40 @@
       font-size: 14px;
       color: #666;
       margin-top: 15px;
+    }
+
+    .copy-button {
+      margin-left: 10px;
+      padding: 8px 12px;
+      background-color: #0366d6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .copy-button:hover {
+      background-color: #0256b9;
+    }
+
+    .copy-button.copied {
+      background-color: #28a745;
+    }
+
+    .code-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .code-text {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 2px;
     }
   </style>
   <!-- Firebase libraries -->
@@ -95,6 +133,24 @@
       return code;
     };
     
+    // Copy to clipboard function
+    const copyToClipboard = (text) => {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          const copyButton = document.getElementById('copy-button');
+          copyButton.textContent = 'Copied!';
+          copyButton.classList.add('copied');
+          
+          setTimeout(() => {
+            copyButton.textContent = 'Copy';
+            copyButton.classList.remove('copied');
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+    };
+    
     // Root element
     const rootElement = document.getElementById('access-code-root');
     
@@ -132,12 +188,22 @@
         rootElement.innerHTML = `
           <div class="access-code-container">
             <h3>Your Access Code</h3>
-            <div class="access-code-display">${accessCode}</div>
+            <div class="access-code-display">
+              <div class="code-wrapper">
+                <span class="code-text">${accessCode}</span>
+                <button id="copy-button" class="copy-button">Copy</button>
+              </div>
+            </div>
             <p class="access-code-instructions">
               Save this code in a safe place. You'll need it to access your purchase.
             </p>
           </div>
         `;
+        
+        // Add click event listener to the copy button
+        document.getElementById('copy-button').addEventListener('click', () => {
+          copyToClipboard(accessCode);
+        });
         
       } catch (err) {
         console.error('Error generating access code:', err);

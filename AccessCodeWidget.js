@@ -6,6 +6,7 @@ class AccessCodeWidget extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.firebaseInitialized = false;
+    this.accessCode = null;
   }
 
   generateUniqueCode() {
@@ -34,6 +35,32 @@ class AccessCodeWidget extends HTMLElement {
     this.firebaseInitialized = true;
   }
 
+  copyToClipboard() {
+    if (!this.accessCode) return;
+    
+    const copyButton = this.shadowRoot.getElementById('copy-button');
+    if (!copyButton) return;
+    
+    navigator.clipboard.writeText(this.accessCode)
+      .then(() => {
+        copyButton.textContent = 'Copied!';
+        copyButton.classList.add('copied');
+        
+        setTimeout(() => {
+          copyButton.textContent = 'Copy';
+          copyButton.classList.remove('copied');
+        }, 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err);
+        copyButton.textContent = 'Error';
+        
+        setTimeout(() => {
+          copyButton.textContent = 'Copy';
+        }, 2000);
+      });
+  }
+
   async connectedCallback() {
     // Initialize CSS
     const style = document.createElement('style');
@@ -49,14 +76,44 @@ class AccessCodeWidget extends HTMLElement {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       }
       .access-code-display {
-        font-size: 24px;
-        font-weight: bold;
-        letter-spacing: 2px;
+        position: relative;
         margin: 20px 0;
         padding: 15px;
         background-color: #fff;
         border: 1px dashed #ccc;
         border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .code-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .code-text {
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 2px;
+      }
+      .copy-button {
+        margin-left: 10px;
+        padding: 8px 12px;
+        background-color: #0366d6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+      }
+      .copy-button:hover {
+        background-color: #0256b9;
+      }
+      .copy-button.copied {
+        background-color: #28a745;
       }
       .access-code-loading {
         padding: 20px;
@@ -123,6 +180,9 @@ class AccessCodeWidget extends HTMLElement {
         });
       }
 
+      // Save the access code to the instance
+      this.accessCode = accessCode;
+
       // Remove loading and show the code
       this.shadowRoot.innerHTML = '';
       this.shadowRoot.appendChild(style);
@@ -135,11 +195,27 @@ class AccessCodeWidget extends HTMLElement {
       
       const codeDisplay = document.createElement('div');
       codeDisplay.className = 'access-code-display';
-      codeDisplay.textContent = accessCode;
+      
+      const codeWrapper = document.createElement('div');
+      codeWrapper.className = 'code-wrapper';
+      
+      const codeText = document.createElement('span');
+      codeText.className = 'code-text';
+      codeText.textContent = accessCode;
+      
+      const copyButton = document.createElement('button');
+      copyButton.id = 'copy-button';
+      copyButton.className = 'copy-button';
+      copyButton.textContent = 'Copy';
+      copyButton.addEventListener('click', () => this.copyToClipboard());
       
       const instructions = document.createElement('p');
       instructions.className = 'access-code-instructions';
       instructions.textContent = 'Save this code in a safe place. You\'ll need it to access your purchase.';
+      
+      codeWrapper.appendChild(codeText);
+      codeWrapper.appendChild(copyButton);
+      codeDisplay.appendChild(codeWrapper);
       
       container.appendChild(heading);
       container.appendChild(codeDisplay);
