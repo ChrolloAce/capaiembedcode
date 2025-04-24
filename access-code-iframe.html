@@ -88,7 +88,8 @@
     const generateUniqueCode = () => {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
-      for (let i = 0; i < 8; i++) {
+      // Generate a 16-character code like "3ZW4U2W2MB5ERU4T"
+      for (let i = 0; i < 16; i++) {
         code += characters.charAt(Math.floor(Math.random() * characters.length));
       }
       return code;

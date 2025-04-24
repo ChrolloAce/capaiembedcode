@@ -3,10 +3,10 @@ import { db } from './firebaseConfig';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const generateUniqueCode = () => {
-  // Generate a random 8-character alphanumeric code
+  // Generate a random 16-character alphanumeric code
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 16; i++) {
     code += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return code;
