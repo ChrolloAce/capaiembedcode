@@ -148,7 +148,8 @@ class AccessCodeGenerator {
       expirationDate.setFullYear(currentDate.getFullYear() + 1); // Expires in 1 year
 
       // Save to Firebase with clean structure (compatible with iOS app verification)
-      await this.db.collection('purchase_codes').add({
+      // Use the unformatted code as the document ID so iOS app can find it easily
+      await this.db.collection('purchase_codes').doc(codeData.code).set({
         code: codeData.code, // Unformatted code (for iOS app normalization/verification)
         formattedCode: codeData.formattedCode, // Formatted code with dashes (display only)
         creationDate: currentDate, // Match iOS app field naming
