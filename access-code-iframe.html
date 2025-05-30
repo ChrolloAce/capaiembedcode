@@ -188,11 +188,16 @@
         code += characters.charAt(Math.floor(randomValue * characters.length));
       }
       
-      // Format with dashes: XXXX-XXXX-XXXX-XXXX
-      return code.substring(0, 4) + '-' + 
-             code.substring(4, 8) + '-' + 
-             code.substring(8, 12) + '-' + 
-             code.substring(12, 16);
+      // Return both unformatted and formatted versions
+      const formattedCode = code.substring(0, 4) + '-' + 
+                           code.substring(4, 8) + '-' + 
+                           code.substring(8, 12) + '-' + 
+                           code.substring(12, 16);
+      
+      return {
+        code: code, // Unformatted: "2ENQFWEBB6NGXXUT"
+        formattedCode: formattedCode // Formatted: "2ENQ-FWEB-B6NG-XXUT"
+      };
     };
     
     // Copy to clipboard function with iframe-compatible fallback
@@ -294,16 +299,22 @@
         
         // Generate 40 unique codes using the improved method
         for (let i = 0; i < 40; i++) {
-          const code = generateUniqueCode();
-          codes.push(code);
+          const codeData = generateUniqueCode();
+          const currentDate = new Date();
+          const expirationDate = new Date();
+          expirationDate.setFullYear(currentDate.getFullYear() + 1); // Expires in 1 year
+          
+          codes.push(codeData.formattedCode);
           
           // Create a document reference for each code
           const docRef = db.collection('purchase_codes').doc();
           batch.set(docRef, {
-            code: code,
+            code: codeData.code, // Unformatted code
+            formattedCode: codeData.formattedCode, // Formatted code with dashes
+            creationDate: currentDate, // Match expected field name
+            expirationDate: expirationDate, // Add expiration date
             userId: 'bulk-generated',
             purchaseId: `bulk-${Date.now()}-${i}`,
-            createdAt: new Date(),
             used: false
           });
         }
@@ -351,24 +362,29 @@
         }
         
         // Always generate a new code
-        const accessCode = generateUniqueCode();
+        const codeData = generateUniqueCode();
+        const currentDate = new Date();
+        const expirationDate = new Date();
+        expirationDate.setFullYear(currentDate.getFullYear() + 1); // Expires in 1 year
         
-        // Save to Firebase
+        // Save to Firebase with proper structure
         await db.collection('purchase_codes').add({
-          code: accessCode,
+          code: codeData.code, // Unformatted code
+          formattedCode: codeData.formattedCode, // Formatted code with dashes
+          creationDate: currentDate, // Match expected field name
+          expirationDate: expirationDate, // Add expiration date
           userId: userId,
           purchaseId: purchaseId,
-          createdAt: new Date(),
           used: false
         });
         
-        // Display the code
+        // Display the formatted code
         rootElement.innerHTML = `
           <div class="access-code-container">
             <h3>Your Access Code</h3>
             <div class="access-code-display">
               <div class="code-wrapper">
-                <span class="code-text">${accessCode}</span>
+                <span class="code-text">${codeData.formattedCode}</span>
                 <button id="copy-button" class="copy-button">Copy</button>
               </div>
             </div>
@@ -380,7 +396,7 @@
         
         // Add click event listener to the copy button
         document.getElementById('copy-button').addEventListener('click', () => {
-          copyToClipboard(accessCode);
+          copyToClipboard(codeData.formattedCode);
         });
         
         // If bulk parameter is true, automatically generate 40 codes

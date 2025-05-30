@@ -26,11 +26,16 @@ class AccessCodeGenerator {
       code += characters.charAt(Math.floor(randomValue * characters.length));
     }
     
-    // Format with dashes: XXXX-XXXX-XXXX-XXXX
-    return code.substring(0, 4) + '-' + 
-           code.substring(4, 8) + '-' + 
-           code.substring(8, 12) + '-' + 
-           code.substring(12, 16);
+    // Return both unformatted and formatted versions
+    const formattedCode = code.substring(0, 4) + '-' + 
+                         code.substring(4, 8) + '-' + 
+                         code.substring(8, 12) + '-' + 
+                         code.substring(12, 16);
+    
+    return {
+      code: code, // Unformatted: "2ENQFWEBB6NGXXUT"
+      formattedCode: formattedCode // Formatted: "2ENQ-FWEB-B6NG-XXUT"
+    };
   }
 
   initializeFirebase() {
@@ -123,18 +128,23 @@ class AccessCodeGenerator {
       }
 
       // Always generate a new code
-      const accessCode = this.generateUniqueCode();
+      const codeData = this.generateUniqueCode();
+      const currentDate = new Date();
+      const expirationDate = new Date();
+      expirationDate.setFullYear(currentDate.getFullYear() + 1); // Expires in 1 year
 
-      // Save to Firebase
+      // Save to Firebase with proper structure
       await this.db.collection('purchase_codes').add({
-        code: accessCode,
+        code: codeData.code, // Unformatted code
+        formattedCode: codeData.formattedCode, // Formatted code with dashes
+        creationDate: currentDate, // Match expected field name
+        expirationDate: expirationDate, // Add expiration date
         userId: this.userId,
         purchaseId: this.purchaseId,
-        createdAt: new Date(),
         used: false
       });
 
-      return accessCode;
+      return codeData;
     } catch (err) {
       console.error('Error generating access code:', err);
       throw err;
@@ -161,7 +171,7 @@ class AccessCodeGenerator {
     // Generate or retrieve access code
     try {
       const accessCode = await this.checkExistingCode();
-      this.showCode(accessCode);
+      this.showCode(accessCode.formattedCode);
     } catch (err) {
       this.showError(err.message || 'Failed to generate access code.');
     }
