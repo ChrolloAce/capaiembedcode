@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Code Generator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .code-block {
+      background-color: #f6f8fa;
+      border-radius: 5px;
+      padding: 15px;
+      overflow-x: auto;
+      font-family: monospace;
+      margin: 20px 0;
+    }
+
+    h1 {
+      color: #0366d6;
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: #24292e;
+    }
+
+    .example {
+      border-left: 4px solid #0366d6;
+      padding-left: 20px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Firebase Access Code Generator</h1>
+    <p>This is a tool to generate secure, one-time access codes and store them in Firebase Firestore.</p>
+    
+    <h2>Implementation Options</h2>
+    
+    <h3>Option 1: iFrame Embed</h3>
+    <div class="example">
+      <p>Add this code to your funnel:</p>
+      <div class="code-block">
+        &lt;iframe 
+          src="https://chrolloace.github.io/capaiembedcode/access-code-iframe.html?userId=USER_ID&purchaseId=ORDER_ID" 
+          style="border:none; width:100%; height:250px;"&gt;
+        &lt;/iframe&gt;
+      </div>
+    </div>
+    
+    <h3>Option 2: Direct Script Embed</h3>
+    <div class="example">
+      <p>Add these scripts to your funnel:</p>
+      <div class="code-block">
+        &lt;script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"&gt;&lt;/script&gt;
+        &lt;script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"&gt;&lt;/script&gt;
+        &lt;script src="https://chrolloace.github.io/capaiembedcode/access-code-embed.js"&gt;&lt;/script&gt;
+
+        &lt;div id="access-code-container"&gt;&lt;/div&gt;
+        &lt;script&gt;
+          new AccessCodeGenerator({
+            containerId: 'access-code-container',
+            firebaseConfig: {
+              apiKey: "AIzaSyDnSewoxH75cYRPlzjX8SS8SseLTakMl_8",
+              authDomain: "capped-ai.firebaseapp.com",
+              projectId: "capped-ai",
+              storageBucket: "capped-ai.appspot.com",
+              messagingSenderId: "897068191530",
+              appId: "1:897068191530:web:7e3d4af4908ce717021853"
+            },
+            userId: "USER_ID", 
+            purchaseId: "ORDER_ID"
+          }).init();
+        &lt;/script&gt;
+      </div>
+    </div>
+    
+    <h2>Examples</h2>
+    <ul>
+      <li><a href="iframe-embed-example.html">iFrame Embed Example</a></li>
+      <li><a href="direct-embed-example.html">Direct Script Embed Example</a></li>
+    </ul>
+    
+    <h2>Documentation</h2>
+    <p>For full documentation, please refer to the <a href="https://github.com/ChrolloAce/capaiembedcode/blob/main/README.md">README</a>.</p>
+  </div>
+</body>
+</html> 

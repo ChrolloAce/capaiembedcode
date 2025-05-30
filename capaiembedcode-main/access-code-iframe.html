@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Code Generator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    .access-code-container {
+      margin: 20px;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    
+    .access-code-display {
+      position: relative;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #fff;
+      border: 1px dashed #ccc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .access-code-loading {
+      padding: 20px;
+      text-align: center;
+      font-style: italic;
+      color: #666;
+    }
+    
+    .access-code-error {
+      padding: 15px;
+      color: #d32f2f;
+      background-color: #ffebee;
+      border-radius: 4px;
+      margin: 10px 0;
+      text-align: center;
+    }
+    
+    .access-code-instructions {
+      font-size: 14px;
+      color: #666;
+      margin-top: 15px;
+    }
+
+    .copy-button {
+      margin-left: 10px;
+      padding: 8px 12px;
+      background-color: #0366d6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .copy-button:hover {
+      background-color: #0256b9;
+    }
+
+    .copy-button.copied {
+      background-color: #28a745;
+    }
+
+    .code-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .code-text {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    
+    .bulk-codes-container {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #fff;
+      text-align: left;
+    }
+    
+    .bulk-code-item {
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .bulk-code-item:last-child {
+      border-bottom: none;
+    }
+    
+    .bulk-code {
+      font-family: monospace;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+    
+    .copy-all-button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .copy-all-button:hover {
+      background-color: #218838;
+    }
+
+    .bulk-heading {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+  <!-- Firebase libraries -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="access-code-root">
+    <div class="access-code-loading">Generating your access code...</div>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId');
+    const purchaseId = urlParams.get('purchaseId');
+    const generateBulk = urlParams.get('bulk') === 'true';
+    
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnSewoxH75cYRPlzjX8SS8SseLTakMl_8",
+      authDomain: "capped-ai.firebaseapp.com",
+      projectId: "capped-ai",
+      storageBucket: "capped-ai.appspot.com",
+      messagingSenderId: "897068191530",
+      appId: "1:897068191530:web:7e3d4af4908ce717021853"
+    };
+    
+    // Initialize Firebase
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+    
+    // Generate unique code function
+    const generateUniqueCode = () => {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      // Generate a 16-character code like "3ZW4U2W2MB5ERU4T"
+      for (let i = 0; i < 16; i++) {
+        code += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return code;
+    };
+    
+    // Copy to clipboard function
+    const copyToClipboard = (text) => {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          const copyButton = document.getElementById('copy-button');
+          copyButton.textContent = 'Copied!';
+          copyButton.classList.add('copied');
+          
+          setTimeout(() => {
+            copyButton.textContent = 'Copy';
+            copyButton.classList.remove('copied');
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+    };
+    
+    // Copy all codes function
+    const copyAllCodes = (codes) => {
+      const textToCopy = codes.join('\n');
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+          const copyAllButton = document.getElementById('copy-all-button');
+          copyAllButton.textContent = 'All Copied!';
+          
+          setTimeout(() => {
+            copyAllButton.textContent = 'Copy All Codes';
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy all codes: ', err);
+        });
+    };
+    
+    // Generate 40 codes function
+    const generateBulkCodes = async () => {
+      try {
+        const bulkContainer = document.createElement('div');
+        bulkContainer.id = 'bulk-codes-container';
+        bulkContainer.className = 'bulk-codes-container';
+        bulkContainer.innerHTML = '<div class="access-code-loading">Generating 40 codes...</div>';
+        
+        const heading = document.createElement('h3');
+        heading.className = 'bulk-heading';
+        heading.textContent = '40 Generated Access Codes';
+        
+        // Add the heading and container
+        document.querySelector('.access-code-container').appendChild(heading);
+        document.querySelector('.access-code-container').appendChild(bulkContainer);
+        
+        const codes = [];
+        const batch = db.batch();
+        
+        // Generate 40 unique codes
+        for (let i = 0; i < 40; i++) {
+          const code = generateUniqueCode();
+          codes.push(code);
+          
+          // Create a document reference for each code
+          const docRef = db.collection('purchase_codes').doc();
+          batch.set(docRef, {
+            code: code,
+            userId: 'bulk-generated',
+            purchaseId: `bulk-${Date.now()}-${i}`,
+            createdAt: new Date(),
+            used: false
+          });
+        }
+        
+        // Commit the batch
+        await batch.commit();
+        
+        // Display the codes
+        let codeListHTML = '';
+        codes.forEach((code, index) => {
+          codeListHTML += `
+            <div class="bulk-code-item">
+              <span class="bulk-code">${index + 1}. ${code}</span>
+            </div>
+          `;
+        });
+        
+        bulkContainer.innerHTML = codeListHTML;
+        
+        // Add the Copy All button
+        const copyAllButton = document.createElement('button');
+        copyAllButton.id = 'copy-all-button';
+        copyAllButton.className = 'copy-all-button';
+        copyAllButton.textContent = 'Copy All Codes';
+        copyAllButton.addEventListener('click', () => copyAllCodes(codes));
+        document.querySelector('.access-code-container').appendChild(copyAllButton);
+        
+      } catch (err) {
+        console.error('Error generating bulk codes:', err);
+        const errorEl = document.createElement('div');
+        errorEl.className = 'access-code-error';
+        errorEl.textContent = `Failed to generate bulk codes. Error: ${err.message}`;
+        document.querySelector('.access-code-container').appendChild(errorEl);
+      }
+    };
+    
+    // Root element
+    const rootElement = document.getElementById('access-code-root');
+    
+    // Check and generate access code
+    const checkAndGenerateCode = async () => {
+      try {
+        if (!userId || !purchaseId) {
+          throw new Error('Missing user ID or purchase ID');
+        }
+        
+        // Check if a code already exists for this purchase
+        const querySnapshot = await db.collection('purchase_codes')
+          .where('purchaseId', '==', purchaseId)
+          .get();
+        
+        let accessCode;
+        if (!querySnapshot.empty) {
+          // Code already exists, retrieve it
+          accessCode = querySnapshot.docs[0].data().code;
+        } else {
+          // Generate a new code
+          accessCode = generateUniqueCode();
+          
+          // Save to Firebase
+          await db.collection('purchase_codes').add({
+            code: accessCode,
+            userId: userId,
+            purchaseId: purchaseId,
+            createdAt: new Date(),
+            used: false
+          });
+        }
+        
+        // Display the code
+        rootElement.innerHTML = `
+          <div class="access-code-container">
+            <h3>Your Access Code</h3>
+            <div class="access-code-display">
+              <div class="code-wrapper">
+                <span class="code-text">${accessCode}</span>
+                <button id="copy-button" class="copy-button">Copy</button>
+              </div>
+            </div>
+            <p class="access-code-instructions">
+              Save this code in a safe place. You'll need it to access your purchase.
+            </p>
+          </div>
+        `;
+        
+        // Add click event listener to the copy button
+        document.getElementById('copy-button').addEventListener('click', () => {
+          copyToClipboard(accessCode);
+        });
+        
+        // If bulk parameter is true, automatically generate 40 codes
+        if (generateBulk) {
+          generateBulkCodes();
+        }
+        
+      } catch (err) {
+        console.error('Error generating access code:', err);
+        rootElement.innerHTML = `
+          <div class="access-code-error">
+            Failed to generate access code. Please contact support.
+          </div>
+        `;
+      }
+    };
+    
+    // Run the code generator once the page loads
+    window.addEventListener('DOMContentLoaded', checkAndGenerateCode);
+  </script>
+</body>
+</html> 

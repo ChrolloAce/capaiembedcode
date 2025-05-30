@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direct Script Embed Example</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-top: 30px;
+    }
+  </style>
+  
+  <!-- Firebase libraries - must be included first -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Our access code generator script -->
+  <script src="https://chrolloace.github.io/capaiembedcode/access-code-embed.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Thank You for Your Purchase!</h1>
+    <p>Your order has been confirmed and is being processed.</p>
+    
+    <!-- Direct embed of the access code widget -->
+    <div id="access-code-container"></div>
+    
+    <script>
+      // Initialize access code generator
+      const firebaseConfig = {
+        apiKey: "AIzaSyDnSewoxH75cYRPlzjX8SS8SseLTakMl_8",
+        authDomain: "capped-ai.firebaseapp.com",
+        projectId: "capped-ai",
+        storageBucket: "capped-ai.appspot.com",
+        messagingSenderId: "897068191530",
+        appId: "1:897068191530:web:7e3d4af4908ce717021853"
+      };
+      
+      // Create the access code generator instance
+      const accessCodeGenerator = new AccessCodeGenerator({
+        containerId: 'access-code-container',
+        firebaseConfig: firebaseConfig,
+        userId: 'user123',
+        purchaseId: 'order456'
+      });
+      
+      // Initialize it
+      accessCodeGenerator.init();
+    </script>
+    
+    <h3>What's Next?</h3>
+    <p>You can use your access code to unlock your purchase by following these steps:</p>
+    <ol>
+      <li>Copy your access code above</li>
+      <li>Go to our member portal</li>
+      <li>Enter your code in the "Redeem Access Code" section</li>
+    </ol>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,14 @@
+// Firestore security rules for access codes
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow reading access codes only if the user ID matches
+    match /purchase_codes/{codeId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Allow creating new codes
+      allow create: if true;
+      // Don't allow updating or deleting codes
+      allow update, delete: if false;
+    }
+  }
+} 
