@@ -15,7 +15,8 @@ class AccessCodeGenerator {
   }
 
   generateUniqueCode() {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    // Safe characters only - no confusing 0/O or 1/I to match iOS app
+    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
     let lastChar = '';
     
@@ -43,15 +44,15 @@ class AccessCodeGenerator {
       lastChar = newChar;
     }
     
-    // Return both unformatted and formatted versions
+    // Return both unformatted and formatted versions to match iOS app expectations
     const formattedCode = code.substring(0, 4) + '-' + 
                          code.substring(4, 8) + '-' + 
                          code.substring(8, 12) + '-' + 
                          code.substring(12, 16);
     
     return {
-      code: code, // Unformatted: "2ENQFWEBB6NGXXUT"
-      formattedCode: formattedCode // Formatted: "2ENQ-FWEB-B6NG-XXUT"
+      code: code, // Unformatted: "2ENQFWEBB6NGXXUT" (for iOS app normalization)
+      formattedCode: formattedCode // Formatted: "2ENQ-FWEB-B6NG-XXUT" (display version)
     };
   }
 
@@ -146,13 +147,13 @@ class AccessCodeGenerator {
       const expirationDate = new Date();
       expirationDate.setFullYear(currentDate.getFullYear() + 1); // Expires in 1 year
 
-      // Save to Firebase with clean structure (no placeholder IDs)
+      // Save to Firebase with clean structure (compatible with iOS app verification)
       await this.db.collection('purchase_codes').add({
-        code: codeData.code, // Unformatted code
-        formattedCode: codeData.formattedCode, // Formatted code with dashes
-        creationDate: currentDate, // Match expected field name
-        expirationDate: expirationDate, // Add expiration date
-        used: false
+        code: codeData.code, // Unformatted code (for iOS app normalization/verification)
+        formattedCode: codeData.formattedCode, // Formatted code with dashes (display only)
+        creationDate: currentDate, // Match iOS app field naming
+        expirationDate: expirationDate, // Default 1 year expiration (matches iOS app)
+        used: false // iOS app will delete code after verification (one-time use)
       });
 
       return codeData;
