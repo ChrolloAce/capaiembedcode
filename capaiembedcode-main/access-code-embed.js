@@ -118,28 +118,17 @@ class AccessCodeGenerator {
         throw new Error('Missing user ID or purchase ID');
       }
 
-      // Check if a code already exists for this purchase
-      const querySnapshot = await this.db.collection('purchase_codes')
-        .where('purchaseId', '==', this.purchaseId)
-        .get();
+      // Always generate a new code
+      const accessCode = this.generateUniqueCode();
 
-      let accessCode;
-      if (!querySnapshot.empty) {
-        // Code already exists, retrieve it
-        accessCode = querySnapshot.docs[0].data().code;
-      } else {
-        // Generate a new code
-        accessCode = this.generateUniqueCode();
-
-        // Save to Firebase
-        await this.db.collection('purchase_codes').add({
-          code: accessCode,
-          userId: this.userId,
-          purchaseId: this.purchaseId,
-          createdAt: new Date(),
-          used: false
-        });
-      }
+      // Save to Firebase
+      await this.db.collection('purchase_codes').add({
+        code: accessCode,
+        userId: this.userId,
+        purchaseId: this.purchaseId,
+        createdAt: new Date(),
+        used: false
+      });
 
       return accessCode;
     } catch (err) {

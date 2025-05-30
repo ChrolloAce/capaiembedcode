@@ -303,28 +303,17 @@
           throw new Error('Missing user ID or purchase ID');
         }
         
-        // Check if a code already exists for this purchase
-        const querySnapshot = await db.collection('purchase_codes')
-          .where('purchaseId', '==', purchaseId)
-          .get();
+        // Always generate a new code
+        const accessCode = generateUniqueCode();
         
-        let accessCode;
-        if (!querySnapshot.empty) {
-          // Code already exists, retrieve it
-          accessCode = querySnapshot.docs[0].data().code;
-        } else {
-          // Generate a new code
-          accessCode = generateUniqueCode();
-          
-          // Save to Firebase
-          await db.collection('purchase_codes').add({
-            code: accessCode,
-            userId: userId,
-            purchaseId: purchaseId,
-            createdAt: new Date(),
-            used: false
-          });
-        }
+        // Save to Firebase
+        await db.collection('purchase_codes').add({
+          code: accessCode,
+          userId: userId,
+          purchaseId: purchaseId,
+          createdAt: new Date(),
+          used: false
+        });
         
         // Display the code
         rootElement.innerHTML = `
