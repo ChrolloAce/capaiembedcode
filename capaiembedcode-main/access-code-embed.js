@@ -17,9 +17,13 @@ class AccessCodeGenerator {
   generateUniqueCode() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
-    // Generate a 16-character code
+    // Generate a 16-character code with better randomization
     for (let i = 0; i < 16; i++) {
-      code += characters.charAt(Math.floor(Math.random() * characters.length));
+      // Use crypto.getRandomValues for better randomness if available
+      const randomValue = window.crypto && window.crypto.getRandomValues 
+        ? window.crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1)
+        : Math.random();
+      code += characters.charAt(Math.floor(randomValue * characters.length));
     }
     
     // Format with dashes: XXXX-XXXX-XXXX-XXXX

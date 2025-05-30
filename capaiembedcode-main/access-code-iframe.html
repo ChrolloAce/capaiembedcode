@@ -179,9 +179,13 @@
     const generateUniqueCode = () => {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
-      // Generate a 16-character code
+      // Generate a 16-character code with better randomization
       for (let i = 0; i < 16; i++) {
-        code += characters.charAt(Math.floor(Math.random() * characters.length));
+        // Use crypto.getRandomValues for better randomness if available
+        const randomValue = window.crypto && window.crypto.getRandomValues 
+          ? window.crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1)
+          : Math.random();
+        code += characters.charAt(Math.floor(randomValue * characters.length));
       }
       
       // Format with dashes: XXXX-XXXX-XXXX-XXXX
@@ -191,22 +195,65 @@
              code.substring(12, 16);
     };
     
-    // Copy to clipboard function
+    // Copy to clipboard function with iframe-compatible fallback
     const copyToClipboard = (text) => {
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          const copyButton = document.getElementById('copy-button');
-          copyButton.textContent = 'Copied!';
-          copyButton.classList.add('copied');
-          
-          setTimeout(() => {
-            copyButton.textContent = 'Copy';
-            copyButton.classList.remove('copied');
-          }, 2000);
-        })
-        .catch(err => {
-          console.error('Failed to copy text: ', err);
-        });
+      // Try modern Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            updateCopyButton('Copied!', true);
+          })
+          .catch(() => {
+            // Fallback to legacy method
+            fallbackCopyTextToClipboard(text);
+          });
+      } else {
+        // Use legacy method for iframes
+        fallbackCopyTextToClipboard(text);
+      }
+    };
+    
+    // Fallback copy method that works in iframes
+    const fallbackCopyTextToClipboard = (text) => {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          updateCopyButton('Copied!', true);
+        } else {
+          updateCopyButton('Failed', false);
+        }
+      } catch (err) {
+        updateCopyButton('Failed', false);
+      }
+      
+      document.body.removeChild(textArea);
+    };
+    
+    // Update copy button appearance
+    const updateCopyButton = (text, success) => {
+      const copyButton = document.getElementById('copy-button');
+      if (copyButton) {
+        copyButton.textContent = text;
+        if (success) {
+          copyButton.style.backgroundColor = '#28a745';
+        } else {
+          copyButton.style.backgroundColor = '#dc3545';
+        }
+        
+        setTimeout(() => {
+          copyButton.textContent = 'Copy';
+          copyButton.style.backgroundColor = '#0366d6';
+        }, 2000);
+      }
     };
     
     // Copy all codes function
@@ -245,7 +292,7 @@
         const codes = [];
         const batch = db.batch();
         
-        // Generate 40 unique codes
+        // Generate 40 unique codes using the improved method
         for (let i = 0; i < 40; i++) {
           const code = generateUniqueCode();
           codes.push(code);
