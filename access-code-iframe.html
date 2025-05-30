@@ -179,13 +179,30 @@
     const generateUniqueCode = () => {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
-      // Generate a 16-character code with better randomization
+      let lastChar = '';
+      
+      // Generate a 16-character code with better randomization and pattern avoidance
       for (let i = 0; i < 16; i++) {
-        // Use crypto.getRandomValues for better randomness if available
-        const randomValue = window.crypto && window.crypto.getRandomValues 
-          ? window.crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1)
-          : Math.random();
-        code += characters.charAt(Math.floor(randomValue * characters.length));
+        let newChar;
+        let attempts = 0;
+        
+        do {
+          // Use crypto.getRandomValues more efficiently
+          const randomArray = window.crypto && window.crypto.getRandomValues 
+            ? window.crypto.getRandomValues(new Uint8Array(1))
+            : [Math.floor(Math.random() * 256)];
+          
+          const randomValue = randomArray[0] / 256;
+          newChar = characters.charAt(Math.floor(randomValue * characters.length));
+          attempts++;
+          
+          // Avoid infinite loops
+          if (attempts > 10) break;
+          
+        } while (newChar === lastChar && i > 0); // Avoid consecutive repeated characters
+        
+        code += newChar;
+        lastChar = newChar;
       }
       
       // Return both unformatted and formatted versions
