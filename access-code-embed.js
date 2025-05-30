@@ -123,24 +123,18 @@ class AccessCodeGenerator {
 
   async checkExistingCode() {
     try {
-      if (!this.userId || !this.purchaseId) {
-        throw new Error('Missing user ID or purchase ID');
-      }
-
-      // Always generate a new code
+      // Always generate a new code (no user/purchase ID required)
       const codeData = this.generateUniqueCode();
       const currentDate = new Date();
       const expirationDate = new Date();
       expirationDate.setFullYear(currentDate.getFullYear() + 1); // Expires in 1 year
 
-      // Save to Firebase with proper structure
+      // Save to Firebase with clean structure (no placeholder IDs)
       await this.db.collection('purchase_codes').add({
         code: codeData.code, // Unformatted code
         formattedCode: codeData.formattedCode, // Formatted code with dashes
         creationDate: currentDate, // Match expected field name
         expirationDate: expirationDate, // Add expiration date
-        userId: this.userId,
-        purchaseId: this.purchaseId,
         used: false
       });
 
